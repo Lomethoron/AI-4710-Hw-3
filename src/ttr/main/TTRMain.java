@@ -13,7 +13,7 @@ public class TTRMain {
 		TicketToRide myGame = new TicketToRide();
 		
 		/* Initialize two players */
-		Player player1 = new HumanPlayer("Human Player 1");
+		Player player1 = new StupidPlayer("Stupid Player 1");
 		Player player2 = new StupidPlayer("Stupid Player 2");
 		//player2.setHideStats(true);
 		
