@@ -19,9 +19,14 @@ public class TTRPlayer extends Player {
 	@Override
 	public void makeMove() {
 		ArrayList<ArrayList<Route>> foo = getPath(Destination.Seattle, Destination.Boston);
+		Routes routesf = Routes.getInstance();
 		for(ArrayList<Route> routes :foo){
-			System.out.print(routes.get(0).getDest1().name()+" ");
+			System.out.println("Route from "+ routes.get(0).getDest1().name() + " to "+ routes.get(0).getDest2().name()+" at cost "+ routes.get(0).getCost());
+			System.out.println(routesf.shortestPathcost(Destination.Boston, Destination.Seattle));
+			//System.out.print(routes.get(0).getDest1().name()+" ");
 		}
+		
+		System.out.println(routesf.shortestPathcost(Destination.Duluth, Destination.Toronto));
 		//Do I still have goals to accomplish
 			//if no, get new goals
 		//attempt to do current goal
@@ -39,72 +44,87 @@ public class TTRPlayer extends Player {
 		Routes routes = Routes.getInstance();
 		PriorityQueue<PathNode> openList = new PriorityQueue<PathNode>(1, new PathNodeComparator());
 		ArrayList<PathNode> closedList = new ArrayList<PathNode>();
-		HashMap<Destination, Destination> previousCityFinder = new HashMap<Destination, Destination>();
 		
-		//init
-		for(Destination dest: routes.getNeighbors(from)){ 
-			Route toDest = routes.getRoutes(dest, from).get(0);
-			openList.add(new PathNode(dest, from, toDest.getCost()));
-			previousCityFinder.put(dest, from);
-			System.out.println(from+" links to " +dest);
-		}
+		//get origin onto PQ
+		PathNode origin = new PathNode(from);
+		openList.add(origin);
 		
 		while(!openList.isEmpty()){
-			//System.out.println("Wheee");
-			//pop pathnode off the top
-			PathNode nextNode = openList.poll();
-			//is it the end?
-			if(nextNode.getCurr() == to){
+			PathNode node = openList.poll();
+			//int fooCost = routes.shortestPathcost(from, node.getCurr());
+			//System.out.println("Were looking at "+node.getCurr().name()+". The previous node is "+node.getPrev()+". The distance from start is "+ node.getDistToStart()+ ". The best possible cost to here is "+fooCost);
+			//deal with the node having already been closed
+			if(closedList.contains(node)){
+				//System.out.println("Skipping already searched city "+node.getCurr().name()+"\n");
+				continue;
+			}
+			//deal with this being the end node
+			if(node.getCurr() == to){
+				//push all the routes into a stack
 				Stack<ArrayList<Route>> pathBuilder = new Stack<ArrayList<Route>>();
 				boolean pathNotComplete = true;
-				Destination prev = nextNode.getPrev();
-				ArrayList<Route> initRoute = routes.getRoutes(to, prev);
-				pathBuilder.push(initRoute);
-				//build up the stack
-				while(pathNotComplete){
-					Destination next = previousCityFinder.get(prev);
-					System.out.println("Pushing "+ prev+ " to "+next);
-					pathBuilder.push(routes.getRoutes(prev, next));
-					if(next == from){
-						pathNotComplete = false;
-						continue;
+				PathNode curr = node;
+				PathNode prev = null;
+				for(PathNode fooNode: closedList){
+					if(fooNode.getCurr() == curr.getPrev()){
+						prev = fooNode;
+						break;
 					}
-					prev = next;
-					
 				}
-				//reverse the ordering
-				ArrayList<ArrayList<Route>> finalRoute = new ArrayList<ArrayList<Route>>();
+				while(pathNotComplete){
+					//if its the start node					
+					Destination currName = curr.getCurr();
+					Destination prevName = prev.getCurr();
+					if(currName == from){
+						break;
+					}
+					//System.out.println("Building path from "+currName.name()+ " to "+prevName.name());
+					pathBuilder.push(routes.getRoutes(currName, prevName));
+					curr = prev;
+					for(PathNode fooNode: closedList){
+						if(fooNode.getCurr() == curr.getPrev()){
+							prev = fooNode;
+						}
+					}	
+				}
+				
+				//System.out.println("Building route");
+				ArrayList<ArrayList<Route>> orderedRoute = new ArrayList<ArrayList<Route>>();
 				while(!pathBuilder.isEmpty()){
-					finalRoute.add(pathBuilder.pop());
+					orderedRoute.add(pathBuilder.pop());
 				}
-				return finalRoute;
+				return orderedRoute;
 			}
-			//keep searching
-			for(Destination dest: routes.getNeighbors(nextNode.getCurr())){
-				int bestCost = routes.shortestPathcost(from, dest);
-				System.out.println("Best Cost: "+bestCost+ " Current Cost: "+nextNode.getDistToStart());
-				if(!previousCityFinder.containsKey(dest)&&dest!=from){
-					previousCityFinder.put(dest, nextNode.getCurr());
-					System.out.println(nextNode.getCurr()+" links to " +dest);
+			//add all values to the pq
+			for(Destination dest: routes.getNeighbors(node.getCurr())){
+				//prevents looping
+				boolean isClosed = false;
+				for(PathNode fooNode : closedList)
+				{
+					if (dest == fooNode.getCurr()){
+						//System.out.println(dest.name()+" Node is closed");
+						isClosed = true;
+						break;
+					}
 				}
-				//System.out.println("Best Cost: "+bestCost+ " Current Cost: "+nextNode.getDistToStart());
-				else if(previousCityFinder.containsKey(dest)&&bestCost<nextNode.getDistToStart()){
-					previousCityFinder.put(dest, nextNode.getCurr());
-					System.out.println(nextNode.getCurr()+" links to " +dest);
+				if(!isClosed){
+					//get cost of this node
+					int cost = routes.getRoutes(dest, node.getCurr()).get(0).getCost();	
+					//System.out.println("Adding "+dest.name()+" to be searched. Its previous node is "+node.getCurr()+". Its cost is "+cost+". Its total cost is "+(cost+node.getDistToStart()));
+					PathNode nextNode = new PathNode(dest, node.getCurr(), node.getDistToStart()+cost);
+					openList.add(nextNode);
 				}
-				if(!closedList.contains(nextNode)){
-					Route toDest = routes.getRoutes(nextNode.getCurr(), dest).get(0);
-					openList.add(new PathNode(dest, nextNode.getCurr(), toDest.getCost()+nextNode.getDistToStart()));
-					//System.out.println("Adding "+nextNode.getCurr().name()+" to "+ dest.name());
+				else{
+					//System.out.println("Not searching "+dest.name()+" because it is already closed.");
 				}
 			}
-			
-			closedList.add(nextNode);
-			
+			//close node
+			closedList.add(node);
+			//System.out.println("Closing: "+ node.getCurr()+"\n");
 		}
+		throw new RuntimeException("Path not found");
 		
-		throw new RuntimeException("No path found");
-		//return null;
+		
 	}
 
 }
@@ -122,6 +142,16 @@ class PathNode {
 		distToStart = Integer.MAX_VALUE;
 	}
 	
+	/**
+	 * creating the origin node
+	 * @param curr the origin node
+	 */
+	public PathNode(Destination curr){
+		this.curr = curr;
+		prev = null;
+		distToStart = 0;
+	}
+	
 	public PathNode(Destination curr, Destination prev, int distToStart){
 		this.curr = curr;
 		this.prev = prev;
@@ -131,7 +161,7 @@ class PathNode {
 	@Override
 	public boolean equals(Object obj){
 		PathNode b = (PathNode) obj;
-		if(b.getCurr() == this.curr && b.getPrev() == this.prev){
+		if(b.getCurr() == this.curr){
 			return true;
 		}
 		return false;
