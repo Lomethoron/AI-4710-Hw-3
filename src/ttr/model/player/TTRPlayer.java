@@ -18,7 +18,10 @@ public class TTRPlayer extends Player {
 	
 	@Override
 	public void makeMove() {
-		ArrayList<Route> foo = getPath(Destination.Seattle, Destination.Denver);
+		ArrayList<ArrayList<Route>> foo = getPath(Destination.Seattle, Destination.Denver);
+		for(ArrayList<Route> routes :foo){
+			System.out.print(routes.get(0).getDest1().name());
+		}
 		//Do I still have goals to accomplish
 			//if no, get new goals
 		//attempt to do current goal
@@ -32,30 +35,61 @@ public class TTRPlayer extends Player {
 
 	}
 	
-	public ArrayList<Route> getPath(Destination to, Destination from){
+	public ArrayList<ArrayList<Route>> getPath(Destination to, Destination from){
 		Routes routes = Routes.getInstance();
-		PriorityQueue<PathNode> openList = new PriorityQueue<PathNode>(10, new PathNodeComparator());
+		PriorityQueue<PathNode> openList = new PriorityQueue<PathNode>(1, new PathNodeComparator());
 		ArrayList<PathNode> closedList = new ArrayList<PathNode>();
 		
 		//init
 		for(Destination dest: routes.getNeighbors(from)){ 
-			Route toDest = routes.getRoutes(to, from).get(0);
-			openList.add(new PathNode(from, to, toDest.getCost()));
+			Route toDest = routes.getRoutes(from, dest).get(0);
+			openList.add(new PathNode(from, dest, toDest.getCost()));
 		}
 		
 		while(!openList.isEmpty()){
+			System.out.println("Wheee");
 			//pop pathnode off the top
 			PathNode nextNode = openList.poll();
 			//is it the end?
 			if(nextNode.getCurr() == to){
-				return null;
+				Stack<ArrayList<Route>> pathBuilder = new Stack<ArrayList<Route>>();
+				boolean pathNotComplete = true;
+				Destination prev = nextNode.getPrev();
+				ArrayList<Route> initRoute = routes.getRoutes(to, prev);
+				pathBuilder.push(initRoute);
+				//build up the stack
+				while(pathNotComplete){
+					for(PathNode path: closedList){
+						if(path.getCurr() == prev){
+							pathBuilder.push(routes.getRoutes(path.getCurr(), path.getPrev()));
+							prev = path.getPrev();
+							if(prev == from){
+								pathNotComplete = false;
+							}
+						}
+					}
+				}
+				//reverse the ordering
+				ArrayList<ArrayList<Route>> finalRoute = new ArrayList<ArrayList<Route>>();
+				while(!pathBuilder.isEmpty()){
+					finalRoute.add(pathBuilder.pop());
+				}
+				return finalRoute;
+			}
+			//keep searching
+			for(Destination dest: routes.getNeighbors(nextNode.getCurr())){ 
+				if(!closedList.contains(nextNode)){
+					Route toDest = routes.getRoutes(nextNode.getCurr(), dest).get(0);
+					openList.add(new PathNode(nextNode.getCurr(), dest, toDest.getCost()));
+				}
 			}
 			
+			closedList.add(nextNode);
 			
 		}
 		
-		
-		return null;
+		throw new RuntimeException("No path found");
+		//return null;
 	}
 
 }
@@ -77,6 +111,16 @@ class PathNode {
 		this.curr = curr;
 		this.prev = prev;
 		this.distToStart = distToStart;
+	}
+	
+	@Override
+	public boolean equals(Object obj){
+		PathNode b = (PathNode) obj;
+		if(b.getCurr() == this.curr && b.getPrev() == this.curr){
+			return true;
+		}
+		return false;
+		
 	}
 
 	public Destination getCurr() {
