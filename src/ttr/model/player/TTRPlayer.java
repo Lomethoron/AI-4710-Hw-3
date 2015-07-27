@@ -4,6 +4,7 @@ import ttr.model.destinationCards.Route;
 
 public class TTRPlayer extends Player {
 	
+	
 	public TTRPlayer(String name) {
 		super(name);
 	}

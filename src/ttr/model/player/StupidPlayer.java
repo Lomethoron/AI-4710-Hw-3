@@ -10,7 +10,7 @@ import ttr.model.trainCards.TrainCardColor;
  * */
 public class StupidPlayer extends Player{
 	
-	Routes routes;
+	//Routes routes;
 
 	/**
 	 * Need to have this constructor so the player has a name, you can use no parameters and pass the name of your player
@@ -18,11 +18,11 @@ public class StupidPlayer extends Player{
 	 * */
 	public StupidPlayer(String name) {
 		super(name);
-		routes = new Routes();
+		//routes = new Routes();
 	}
 	public StupidPlayer(){
 		super("Stupid Player");
-		routes = new Routes();
+		//routes = new Routes();
 	}
 	
 	/**
@@ -36,8 +36,8 @@ public class StupidPlayer extends Player{
 		}
 		
 		//can I complete any route
-		for(Route route: routes.getAllRoutes() ){
-			if(route.getOwner()==null){
+		for(Route route: Routes.getInstance().getAllRoutes() ){
+			if(!Routes.getInstance().isRouteClaimed(route)){
 				TrainCardColor routeColor = route.getColor();
 				int routeCost = route.getCost();
 				//grey routes
@@ -45,14 +45,18 @@ public class StupidPlayer extends Player{
 					for(TrainCardColor color: TrainCardColor.values()){
 						int numCardsOfColor = getNumTrainCardsByColor(color);
 						if(numCardsOfColor >= routeCost){
+							//System.out.println("grey route");
 							super.claimRoute(new Route(route.getDest1(),route.getDest2(),route.getCost(), route.getColor()), color);
+							break;
 						}
 					}
 				}
 				
 				//colored routes
-				if(getNumTrainCardsByColor(routeColor)+getNumTrainCardsByColor(TrainCardColor.rainbow)>=routeCost){
+				else if(getNumTrainCardsByColor(routeColor)+getNumTrainCardsByColor(TrainCardColor.rainbow)>=routeCost){
+					//System.out.println("non-grey route");
 					super.claimRoute(new Route(route.getDest1(),route.getDest2(),route.getCost(),route.getColor()), routeColor);
+					break;
 				}
 			}
 		}
