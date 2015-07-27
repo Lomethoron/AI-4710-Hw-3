@@ -20,7 +20,7 @@ public class TTRPlayer extends Player {
 	public void makeMove() {
 		ArrayList<ArrayList<Route>> foo = getPath(Destination.Seattle, Destination.Denver);
 		for(ArrayList<Route> routes :foo){
-			System.out.print(routes.get(0).getDest1().name());
+			System.out.print(routes.get(0).getDest1().name()+" ");
 		}
 		//Do I still have goals to accomplish
 			//if no, get new goals
@@ -42,12 +42,12 @@ public class TTRPlayer extends Player {
 		
 		//init
 		for(Destination dest: routes.getNeighbors(from)){ 
-			Route toDest = routes.getRoutes(from, dest).get(0);
-			openList.add(new PathNode(from, dest, toDest.getCost()));
+			Route toDest = routes.getRoutes(dest, from).get(0);
+			openList.add(new PathNode(dest, from, toDest.getCost()));
 		}
 		
 		while(!openList.isEmpty()){
-			System.out.println("Wheee");
+			//System.out.println("Wheee");
 			//pop pathnode off the top
 			PathNode nextNode = openList.poll();
 			//is it the end?
@@ -78,9 +78,11 @@ public class TTRPlayer extends Player {
 			}
 			//keep searching
 			for(Destination dest: routes.getNeighbors(nextNode.getCurr())){ 
+				boolean foo = !closedList.contains(nextNode);
 				if(!closedList.contains(nextNode)){
 					Route toDest = routes.getRoutes(nextNode.getCurr(), dest).get(0);
-					openList.add(new PathNode(nextNode.getCurr(), dest, toDest.getCost()));
+					openList.add(new PathNode(dest, nextNode.getCurr(), toDest.getCost()));
+					System.out.println("Adding "+nextNode.getCurr().name()+" to "+ dest.name());
 				}
 			}
 			
@@ -116,7 +118,7 @@ class PathNode {
 	@Override
 	public boolean equals(Object obj){
 		PathNode b = (PathNode) obj;
-		if(b.getCurr() == this.curr && b.getPrev() == this.curr){
+		if(b.getCurr() == this.curr && b.getPrev() == this.prev){
 			return true;
 		}
 		return false;
