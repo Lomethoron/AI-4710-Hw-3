@@ -18,15 +18,13 @@ public class TTRPlayer extends Player {
 	
 	@Override
 	public void makeMove() {
-		ArrayList<ArrayList<Route>> foo = getPath(Destination.Seattle, Destination.Boston);
+		/*ArrayList<ArrayList<Route>> foo = getPath(Destination.Seattle, Destination.Boston, true);
 		Routes routesf = Routes.getInstance();
 		for(ArrayList<Route> routes :foo){
 			System.out.println("Route from "+ routes.get(0).getDest1().name() + " to "+ routes.get(0).getDest2().name()+" at cost "+ routes.get(0).getCost());
-			System.out.println(routesf.shortestPathcost(Destination.Boston, Destination.Seattle));
 			//System.out.print(routes.get(0).getDest1().name()+" ");
-		}
+		}*/
 		
-		System.out.println(routesf.shortestPathcost(Destination.Duluth, Destination.Toronto));
 		//Do I still have goals to accomplish
 			//if no, get new goals
 		//attempt to do current goal
@@ -40,7 +38,15 @@ public class TTRPlayer extends Player {
 
 	}
 	
-	public ArrayList<ArrayList<Route>> getPath(Destination to, Destination from){
+	/**
+	 * Determines the routes comprising the shortest path between two cities
+	 * @param to city 1
+	 * @param from city 2
+	 * @param considerMadeMoves should the algorithm look to see if all routes have been claimed
+	 * @return the list of routes in the shortest path between destinations, nested ArrayList allows access to multiple existant routes between adjacent cities, returns null if no route is found
+	 */
+	
+	public ArrayList<ArrayList<Route>> getPath(Destination to, Destination from, boolean considerMadeMoves){
 		Routes routes = Routes.getInstance();
 		PriorityQueue<PathNode> openList = new PriorityQueue<PathNode>(1, new PathNodeComparator());
 		ArrayList<PathNode> closedList = new ArrayList<PathNode>();
@@ -107,22 +113,38 @@ public class TTRPlayer extends Player {
 						break;
 					}
 				}
-				if(!isClosed){
-					//get cost of this node
-					int cost = routes.getRoutes(dest, node.getCurr()).get(0).getCost();	
-					//System.out.println("Adding "+dest.name()+" to be searched. Its previous node is "+node.getCurr()+". Its cost is "+cost+". Its total cost is "+(cost+node.getDistToStart()));
-					PathNode nextNode = new PathNode(dest, node.getCurr(), node.getDistToStart()+cost);
-					openList.add(nextNode);
+				Route thisRoute = routes.getRoutes(dest, node.getCurr()).get(0);
+				if(considerMadeMoves){
+					if(!isClosed&&!routes.isRouteClaimed(thisRoute)){
+						//get cost of this node
+						int cost = thisRoute.getCost();	
+						//System.out.println("Adding "+dest.name()+" to be searched. Its previous node is "+node.getCurr()+". Its cost is "+cost+". Its total cost is "+(cost+node.getDistToStart()));
+						PathNode nextNode = new PathNode(dest, node.getCurr(), node.getDistToStart()+cost);
+						openList.add(nextNode);
+					}
+					else{
+						//System.out.println("Not searching "+dest.name()+" because it is already closed.");
+					}
 				}
 				else{
-					//System.out.println("Not searching "+dest.name()+" because it is already closed.");
+					if(!isClosed){
+						//get cost of this node
+						int cost = thisRoute.getCost();	
+						//System.out.println("Adding "+dest.name()+" to be searched. Its previous node is "+node.getCurr()+". Its cost is "+cost+". Its total cost is "+(cost+node.getDistToStart()));
+						PathNode nextNode = new PathNode(dest, node.getCurr(), node.getDistToStart()+cost);
+						openList.add(nextNode);
+					}
+					else{
+						//System.out.println("Not searching "+dest.name()+" because it is already closed.");
+					}
+					
 				}
 			}
 			//close node
 			closedList.add(node);
 			//System.out.println("Closing: "+ node.getCurr()+"\n");
 		}
-		throw new RuntimeException("Path not found");
+		return null;
 		
 		
 	}
@@ -136,6 +158,9 @@ class PathNode {
 	Destination curr, prev;
 	int distToStart;
 	
+	/**
+	 * Default constructor
+	 */
 	public PathNode(){
 		curr = null;
 		prev = null;
