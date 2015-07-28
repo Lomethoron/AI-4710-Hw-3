@@ -208,17 +208,22 @@ public class Routes {
 		/* First, get all neighbors of this city */
 		ArrayList<Destination> neighbors = getNeighbors(city);
 		
+		if(city == Destination.SaintLouis)
+			System.out.println("STOP");
+		
 		/* Make a list of ones to remove */
-		ArrayList<Destination> toRemove = new ArrayList<Destination>();
+		ArrayList<Destination> toReturn = new ArrayList<Destination>();
 		for(Destination neighbor : neighbors){
 			ArrayList<Route> routes = getRoutes(city, neighbor);
-			for(Route route : routes)
-				if(route != null && !(route.getOwner() == player)) toRemove.add(neighbor);
+			for(Route route : routes){
+				if(route != null && (route.getOwner() == player)){
+					toReturn.add(neighbor);
+					break;
+				}
+			}
 		}
 		
-		for(Destination neighbor : toRemove) neighbors.remove(neighbor);
-		
-		return neighbors;
+		return toReturn;
 	}
 	
 	

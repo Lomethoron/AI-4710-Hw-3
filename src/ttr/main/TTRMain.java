@@ -2,9 +2,9 @@ package ttr.main;
 
 import ttr.model.player.HumanPlayer;
 import ttr.model.player.Player;
-import ttr.model.player.TTRPlayer;
 import ttr.model.player.StupidPlayer;
 import ttr.view.scenes.TTRGamePlayScene;
+import ttr.model.player.TTRPlayer;
 
 public class TTRMain {
 
@@ -14,7 +14,7 @@ public class TTRMain {
 		TicketToRide myGame = new TicketToRide();
 		
 		/* Initialize two players */
-		Player player1 = new TTRPlayer("Stupid Player 1");
+		Player player1 = new TTRPlayer("Human Player 1");
 		Player player2 = new StupidPlayer("Stupid Player 2");
 		//player2.setHideStats(true);
 		

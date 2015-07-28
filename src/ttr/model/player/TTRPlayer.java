@@ -18,12 +18,12 @@ public class TTRPlayer extends Player {
 	
 	@Override
 	public void makeMove() {
-		/*ArrayList<ArrayList<Route>> foo = getPath(Destination.Seattle, Destination.Boston, true);
+		ArrayList<ArrayList<Route>> foo = getPath(Destination.Seattle, Destination.Boston, true);
 		Routes routesf = Routes.getInstance();
 		for(ArrayList<Route> routes :foo){
 			System.out.println("Route from "+ routes.get(0).getDest1().name() + " to "+ routes.get(0).getDest2().name()+" at cost "+ routes.get(0).getCost());
 			//System.out.print(routes.get(0).getDest1().name()+" ");
-		}*/
+		}
 		
 		//Do I still have goals to accomplish
 			//if no, get new goals
@@ -115,7 +115,7 @@ public class TTRPlayer extends Player {
 				}
 				Route thisRoute = routes.getRoutes(dest, node.getCurr()).get(0);
 				if(considerMadeMoves){
-					if(!isClosed&&!routes.isRouteClaimed(thisRoute)){
+					if(!isClosed&&(!routes.isRouteClaimed(thisRoute)||(thisRoute.getOwner() instanceof TTRPlayer))){
 						//get cost of this node
 						int cost = thisRoute.getCost();	
 						//System.out.println("Adding "+dest.name()+" to be searched. Its previous node is "+node.getCurr()+". Its cost is "+cost+". Its total cost is "+(cost+node.getDistToStart()));
@@ -234,21 +234,41 @@ class PathNodeComparator implements Comparator<PathNode>{
 
 class Goal {
 	Destination to, from;
+	boolean isCompleteable;
 
 	/**
 	 * Default constructor
 	 */
 	public Goal(){
-		
+		to = null;
+		from = null;
+		isCompleteable = true;
 	}
 	
 	public Goal(Destination to, Destination from) {
 		this.to = to;
 		this.from = from;
+		isCompleteable = true;
 	}
 	//not sure how I feel about doing this this way
-	public void execute(TTRPlayer player){
-		//-
+	/**
+	 * attempts to execute this goal
+	 * @param player the player
+	 * @return if the goal is unable to be executed
+	 */
+	public boolean execute(TTRPlayer player){
+		boolean consideringClaimedRoutes = true;
+		ArrayList<ArrayList<Route>> neededRoutes = player.getPath(to, from, consideringClaimedRoutes);
+		if(neededRoutes == null){
+			isCompleteable = false;
+			return false;
+		}
+		//order routes by the level of threat they face
+		ArrayList<Route> routesByThreat = new ArrayList<Route>();
+		for(ArrayList<Route> routeBundle : neededRoutes){
+			//for(Route singleRoute:)
+		}
+		return true;
 		
 	}
 	
@@ -267,5 +287,38 @@ class Goal {
 	public void setFrom(Destination from) {
 		this.from = from;
 	}
+
+	public boolean isCompleteable() {
+		return isCompleteable;
+	}
+
+	public void setCompleteable(boolean isCompleteable) {
+		this.isCompleteable = isCompleteable;
+	}
 	
+	
+}
+
+class RouteThreatComparator implements Comparator<Route>{
+	@Override
+	public int compare(Route a, Route b){
+		//find number
+		int aTotalThreat =  calcTotalThreat(a.getDest1())+calcTotalThreat(a.getDest2());
+		int bTotalThreat =  calcTotalThreat(b.getDest1())+calcTotalThreat(b.getDest2());
+		return (aTotalThreat<bTotalThreat)?-1:(aTotalThreat==bTotalThreat)?0:1;
+	}
+	
+	private int calcTotalThreat(Destination a){
+		Routes routes = Routes.getInstance();
+		int threat = 0;
+		for(Destination dest: routes.getNeighbors(a)){
+			ArrayList<Route> fooRouteBundle = routes.getRoutes(dest, a);
+			for(Route fooRoute: fooRouteBundle){
+				if(!(fooRoute.getOwner() instanceof TTRPlayer)){
+					threat++;
+				}
+			}
+		}
+		return threat;
+	}
 }
