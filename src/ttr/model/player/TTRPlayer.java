@@ -3,6 +3,7 @@ package ttr.model.player;
 import java.util.*;
 
 import ttr.model.destinationCards.Destination;
+import ttr.model.destinationCards.DestinationTicket;
 import ttr.model.destinationCards.Route;
 import ttr.model.destinationCards.Routes;
 
@@ -191,6 +192,19 @@ class PathNode {
 		}
 		return false;
 		
+	}
+	
+	
+	public Goal bestOption(ArrayList<DestinationTicket> al){
+		int maxPoints = -1;
+		for(int x=0; x<al.size(); x++)
+		{
+			maxPoints = -1;
+			if(al.get(x).getValue()>0)
+				maxPoints = x;
+		}
+		DestinationTicket destTick = al.get(maxPoints);
+		return new Goal(destTick.getTo(), destTick.getFrom());
 	}
 
 	public Destination getCurr() {
