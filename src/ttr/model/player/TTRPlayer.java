@@ -5,6 +5,8 @@ import java.util.*;
 import ttr.model.destinationCards.Destination;
 import ttr.model.destinationCards.Route;
 import ttr.model.destinationCards.Routes;
+import ttr.model.trainCards.TrainCard;
+import ttr.model.trainCards.TrainCardColor;
 
 public class TTRPlayer extends Player {
 	
@@ -264,12 +266,163 @@ class Goal {
 			return false;
 		}
 		//order routes by the level of threat they face
-		ArrayList<Route> routesByThreat = new ArrayList<Route>();
+		LinkedList<Threat> routesByThreat = new LinkedList<Threat>();
 		for(ArrayList<Route> routeBundle : neededRoutes){
-			//for(Route singleRoute:)
+			int totalThreat = calcTotalThreat(routeBundle.get(0).getDest1())+calcTotalThreat(routeBundle.get(0).getDest2());
+			routesByThreat.add(new Threat(routeBundle, totalThreat));
 		}
-		return true;
+		routesByThreat.sort(new ThreatComparator());
 		
+		//try to purchase route
+		for(Threat threat: routesByThreat){
+			ArrayList<Route> routeBundle = threat.getRoute();
+			for(Route route:routeBundle){
+				if(canPurchase(route, player.getHand(), player.getNumTrainPieces())){
+					//if grey route
+					if(route.getColor()==TrainCardColor.rainbow){
+						CardAmount maxColor = getColorOfMaxPieces(player.getHand());
+						player.claimRoute(route, maxColor.getColor());
+						return true;
+					}
+					//normal route
+					player.claimRoute(route, route.getColor());
+					return true;
+				}
+			}
+		}
+		//get cards for routes
+		for(Threat threat: routesByThreat){
+			ArrayList<Route> routeBundle = threat.getRoute();
+			for(Route route:routeBundle){
+				if(!canPurchase(route, player.getHand(), player.getNumTrainPieces())){
+					//if grey route
+					if(route.getColor()==TrainCardColor.rainbow){
+						player.drawTrainCard(0); //get random card
+						return true;
+					}
+					//normal route
+					ArrayList<TrainCard> visibleCards = player.getFaceUpCards();
+					for(int i = 0; i<visibleCards.size();i++){
+						if(visibleCards.get(i).getColor()==route.getColor()){
+							player.drawTrainCard(i+1);
+							return true;
+						}
+					}
+					//otherwise draw random card
+					player.drawTrainCard(0);
+					return true;
+				}
+			}
+		}
+		System.out.println("We have failed to execute");
+		return false;
+		
+	}
+	
+	private boolean canPurchase(Route route, ArrayList<TrainCard> hand, int numPieces){
+		TrainCardColor routeColor = route.getColor();
+		int routeCost = route.getCost();
+		if(route.getOwner()!=null){
+			System.out.println("This route is owned. You have failed good sir.");
+			return false;
+		}
+		if(routeCost>numPieces){
+			System.out.println("Not enough pieces");
+			return false;
+		}
+		
+		//tally up relevant pieces
+		int piecesOfColorAvailible = 0;
+		int piecesOfRainbowAvailible = 0;
+		for(TrainCard card:hand){
+			if(card.getColor()==routeColor){
+				piecesOfColorAvailible++;
+			}
+			if(card.getColor()==TrainCardColor.rainbow){//why isnt this formatting aaaagh
+				piecesOfRainbowAvailible++;
+			}
+		}
+		
+		//grey routes
+		if(routeColor==TrainCardColor.rainbow){
+			CardAmount mostCard = getColorOfMaxPieces(hand);
+			if(mostCard.getAmount()+piecesOfRainbowAvailible>=routeCost){
+				return true;
+			}
+		}
+		
+		//normal routes
+		if(piecesOfColorAvailible+piecesOfRainbowAvailible>=routeCost){
+			return true;
+		}
+		return false;
+	}
+	
+	private CardAmount getColorOfMaxPieces(ArrayList<TrainCard> hand){
+		CardAmount rainbow = new CardAmount(TrainCardColor.rainbow, 0);
+		CardAmount black = new CardAmount(TrainCardColor.black, 0);
+		CardAmount blue = new CardAmount(TrainCardColor.blue, 0);
+		CardAmount green = new CardAmount(TrainCardColor.green, 0);
+		CardAmount orange = new CardAmount(TrainCardColor.orange, 0);
+		CardAmount purple = new CardAmount(TrainCardColor.purple, 0);
+		CardAmount red = new CardAmount(TrainCardColor.red, 0);
+		CardAmount white = new CardAmount(TrainCardColor.white, 0);
+		CardAmount yellow = new CardAmount(TrainCardColor.yellow, 0);
+		CardAmount best = new CardAmount(TrainCardColor.orange, 0);
+		for(TrainCard card:hand){
+			if(card.getColor()==TrainCardColor.rainbow){
+				rainbow.incAmount();
+				if(rainbow.getAmount()>best.getAmount()) best = rainbow;
+			}
+			if(card.getColor()==TrainCardColor.black){
+				black.incAmount();
+				if(black.getAmount()>best.getAmount()) best = black;
+			}
+			if(card.getColor()==TrainCardColor.blue){
+				blue.incAmount();
+				if(blue.getAmount()>best.getAmount()) best = blue;
+			}
+			if(card.getColor()==TrainCardColor.green){
+				green.incAmount();
+				if(green.getAmount()>best.getAmount()) best = green;
+			}
+			if(card.getColor()==TrainCardColor.orange){
+				orange.incAmount();
+				if(orange.getAmount()>best.getAmount()) best = orange;
+			}
+			if(card.getColor()==TrainCardColor.purple){
+				purple.incAmount();
+				if(purple.getAmount()>best.getAmount()) best = purple;
+			}
+			if(card.getColor()==TrainCardColor.red){
+				red.incAmount();
+				if(red.getAmount()>best.getAmount()) best = red;
+			}
+			if(card.getColor()==TrainCardColor.white){
+				white.incAmount();
+				if(white.getAmount()>best.getAmount()) best = white;
+			}
+			if(card.getColor()==TrainCardColor.yellow){
+				yellow.incAmount();
+				if(yellow.getAmount()>best.getAmount()) best = yellow;
+			}
+		}
+		return best;
+	}
+	
+	private int calcTotalThreat(Destination a){
+		Routes routes = Routes.getInstance();
+		int threat = 0;
+		for(Destination dest: routes.getNeighbors(a)){
+			ArrayList<Route> fooRouteBundle = routes.getRoutes(dest, a);
+			for(Route fooRoute: fooRouteBundle){
+				if(!(fooRoute.getOwner() instanceof TTRPlayer)){
+					threat++;
+					break;
+				}
+			}
+		}
+		return threat;
 	}
 	
 	public Destination getTo() {
@@ -297,6 +450,55 @@ class Goal {
 	}
 	
 	
+}
+
+class Threat{
+	private int threat;
+	private ArrayList<Route> route;
+	public Threat(){
+		threat = -1;
+		route = null;
+	}
+	public Threat(ArrayList<Route> route, int threat){
+		this.route = route;
+		this.threat = threat;
+	}
+	public int getThreat() {
+		return threat;
+	}
+	public ArrayList<Route> getRoute() {
+		return route;
+	}
+}
+
+class CardAmount{
+	private TrainCardColor color;
+	private int amount;
+	public CardAmount(){
+		color = null;
+		amount = -1;
+	}
+	public CardAmount(TrainCardColor color, int amount){
+		this.color = color;
+		this.amount = amount;
+	}
+	public TrainCardColor getColor() {
+		return color;
+	}
+	public int getAmount() {
+		return amount;
+	}
+	public void incAmount(){
+		amount++;
+	}
+	
+}
+
+class ThreatComparator implements Comparator<Threat>{
+	@Override
+	public int compare(Threat a, Threat b){
+		return a.getThreat()<b.getThreat()?-1:a.getThreat()==b.getThreat()?0:1;
+	}
 }
 
 class RouteThreatComparator implements Comparator<Route>{
