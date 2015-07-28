@@ -87,7 +87,7 @@ public class RouteSelectionPanel extends Sprite implements ActionListener{
 		TrainCardColor colorToUse = (TrainCardColor)colors.getSelectedItem();
 		
 		for(Route route : routes){
-			if(route.getColor() == colorToUse){
+			if(route.getColor() == colorToUse || route.getColor() == TrainCardColor.rainbow || colorToUse == TrainCardColor.rainbow){
 				dispatchEvent(new ClaimRouteClickEvent(ClaimRouteClickEvent.CLAIM_ROUTE_CLICKED, this, route, colorToUse));
 				break;
 			}

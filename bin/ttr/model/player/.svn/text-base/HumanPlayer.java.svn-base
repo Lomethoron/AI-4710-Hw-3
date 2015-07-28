@@ -3,13 +3,11 @@ package ttr.model.player;
 import edu.virginia.engine.events.general.Event;
 import edu.virginia.engine.events.general.IEventListener;
 import edu.virginia.engine.events.mouse.MouseEvent;
-import ttr.model.destinationCards.Routes;
 import ttr.model.events.ClaimRouteClickEvent;
 import ttr.model.events.TrainCardClickEvent;
 import ttr.view.gameComponents.DestinationTicketDeckView;
 import ttr.view.gameComponents.RouteSelectionPanel;
 import ttr.view.gameComponents.TrainCardDeckView;
-import ttr.view.scenes.TTRGamePlayScene;
 
 public class HumanPlayer extends Player implements IEventListener{
 
@@ -50,7 +48,6 @@ public class HumanPlayer extends Player implements IEventListener{
 	 * makeMove(). Doesn't need to do anything because moves are handled by the interface.
 	 * */
 	@Override
-	public void makeMove(){
-	}
+	public void makeMove(){}
 	
 }

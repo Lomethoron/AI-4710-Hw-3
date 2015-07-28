@@ -91,7 +91,7 @@ public abstract class Player extends EventDispatcher{
 		if(Routes.getInstance().isRouteClaimed(route)) return false;
 		if(claimedRoutes.contains(route)) return false;
 		if(numTrainPieces < route.getCost()) return false;
-		if(route.getColor() != colorToUse && route.getColor() != TrainCardColor.rainbow) return false;
+		if(route.getColor() != colorToUse && route.getColor() != TrainCardColor.rainbow && colorToUse != TrainCardColor.rainbow) return false;
 		if(colorToUse != TrainCardColor.rainbow){
 			if(this.getNumTrainCardsByColor(colorToUse) + this.getNumTrainCardsByColor(TrainCardColor.rainbow) < route.getCost()) return false;
 		}
@@ -168,9 +168,6 @@ public abstract class Player extends EventDispatcher{
 			if(card.getColor() == color) colorCards.add(card);
 			else if(card.getColor() == TrainCardColor.rainbow) rainbowCards.add(card);
 		}
-		
-		/* If using rainbow explicitly, then we double counted, so clear one array */
-		if(color == TrainCardColor.rainbow) colorCards.clear();
 		
 		/* If there are enough cards, then use them, otherwise return false */
 		if(colorCards.size() + rainbowCards.size() < amount) return false;

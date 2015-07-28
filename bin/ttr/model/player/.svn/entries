@@ -26,16 +26,16 @@ mfloryan
 
 a6432f59-b0dd-ce44-98bf-3b52ca5d8334
 
-HumanPlayer.java
+Player.java
 file
-36
+38
 
 
 
-2015-07-26T04:58:57.807119Z
-69f925a7a1cb7a23465565df81f5c617
-2015-07-26T05:07:59.030810Z
-36
+2015-07-27T02:22:22.923454Z
+785b0ec96b589cadb77df8df68c93d3a
+2015-07-27T02:46:47.804893Z
+38
 mfloryan
 
 
@@ -58,7 +58,41 @@ mfloryan
 
 
 
-1905
+10186
+
+HumanPlayer.java
+file
+38
+
+
+
+2015-07-27T02:29:39.371440Z
+ca80ed4055d30bf09e38bc6faed6e3e2
+2015-07-27T02:46:47.804893Z
+38
+mfloryan
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1817
 
 StupidPlayer.java
 file
@@ -93,38 +127,4 @@ mfloryan
 
 
 794
-
-Player.java
-file
-36
-
-
-
-2015-07-26T05:03:24.531110Z
-723bc4d2e73b7ec2e3c610c84b5158fd
-2015-07-26T05:07:59.030810Z
-36
-mfloryan
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-10290
 

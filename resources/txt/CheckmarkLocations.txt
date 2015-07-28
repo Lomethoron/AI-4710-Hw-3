@@ -47,7 +47,7 @@ Dallas LittleRock 616 489
 Dallas Houston 565 555
 Houston NewOrleans 650 545
 LittleRock NewOrleans 674 482
-Duluth Omaha 359 250
+Duluth Omaha 540 250
 Omaha KansasCity 540 330
 SaintLouis KansasCity 607 330
 SaintLouis LittleRock 626 395
