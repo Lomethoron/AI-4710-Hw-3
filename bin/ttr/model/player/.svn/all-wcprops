@@ -7,7 +7,7 @@ HumanPlayer.java
 K 25
 svn:wc:ra_dav:version-url
 V 86
-/svn/TicketToRide/!svn/ver/38/trunk/ticketToRide/src/ttr/model/player/HumanPlayer.java
+/svn/TicketToRide/!svn/ver/36/trunk/ticketToRide/src/ttr/model/player/HumanPlayer.java
 END
 StupidPlayer.java
 K 25
@@ -19,5 +19,5 @@ Player.java
 K 25
 svn:wc:ra_dav:version-url
 V 81
-/svn/TicketToRide/!svn/ver/38/trunk/ticketToRide/src/ttr/model/player/Player.java
+/svn/TicketToRide/!svn/ver/36/trunk/ticketToRide/src/ttr/model/player/Player.java
 END
