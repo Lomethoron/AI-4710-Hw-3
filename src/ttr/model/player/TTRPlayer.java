@@ -28,6 +28,9 @@ public class TTRPlayer extends Player {
 			//System.out.print(routes.get(0).getDest1().name()+" ");
 		}*/
 		
+		if(super.getDestinationTickets().isEmpty()){
+			super.drawDestinationTickets();
+		}
 		Goal foo = bestOption(super.getDestinationTickets());
 		foo.execute(this);
 		
