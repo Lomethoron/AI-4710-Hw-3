@@ -16,8 +16,8 @@ public class TTRMain {
 		TicketToRide myGame = new TicketToRide();
 		
 		/* Initialize two players */
-		Player player1 = new StupidAI("Test AI 1");
-		Player player2 = new StupidAI("Test AI 2");
+		Player player1 = new TTRPlayer("SUPER AMAZING AI 1");
+		Player player2 = new StupidAI("Test AI 1");
 		//player2.setHideStats(true);
 		
 		TTRGamePlayScene scene = new TTRGamePlayScene("Ticket To Ride", "woodBacking.jpg", myGame, player1, player2);

@@ -50,7 +50,7 @@ public class StupidAI extends Player{
 					for(TrainCardColor color: TrainCardColor.values()){
 						int numCardsOfColor = super.getNumTrainCardsByColor(color);
 						//System.out.println("Grey route, owner is "+route.getOwner());
-						if(numCardsOfColor+super.getNumTrainCardsByColor(TrainCardColor.rainbow) >= routeCost&&route.getOwner()==null){
+						if((numCardsOfColor+super.getNumTrainCardsByColor(TrainCardColor.rainbow)) >= routeCost&&route.getOwner()==null){
 							System.out.println("Looking at route from "+route.getDest1()+ " to "+route.getDest2()+" Grey route, owner is "+route.getOwner()+ " Using "+color+ ". That it is claimed is "+routes.isRouteClaimed(route));
 							super.claimRoute(route, color);
 							break;
@@ -59,7 +59,7 @@ public class StupidAI extends Player{
 				}
 				
 				//colored routes
-				else if(super.getNumTrainCardsByColor(routeColor)+super.getNumTrainCardsByColor(TrainCardColor.rainbow)>=routeCost&&route.getOwner()==null){
+				else if((super.getNumTrainCardsByColor(routeColor)+super.getNumTrainCardsByColor(TrainCardColor.rainbow))>=routeCost&&route.getOwner()==null){
 					System.out.println("Colored route, owner is "+route.getOwner()+ " That it is claimed is "+routes.isRouteClaimed(route));
 					super.claimRoute(route, routeColor);
 					break;

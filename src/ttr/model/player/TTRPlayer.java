@@ -21,6 +21,7 @@ public class TTRPlayer extends Player {
 	
 	@Override
 	public void makeMove() {
+		System.out.println("");
 		/*ArrayList<ArrayList<Route>> foo = getPath(Destination.Seattle, Destination.Boston, true);
 		Routes routesf = Routes.getInstance();
 		for(ArrayList<Route> routes :foo){
@@ -140,7 +141,7 @@ public class TTRPlayer extends Player {
 					if(!isClosed&&(!routes.isRouteClaimed(thisRoute)||(thisRoute.getOwner() instanceof TTRPlayer))){
 						//get cost of this node
 						int cost = thisRoute.getCost();	
-						//System.out.println("Adding "+dest.name()+" to be searched. Its previous node is "+node.getCurr()+". Its cost is "+cost+". Its total cost is "+(cost+node.getDistToStart()));
+						//System.out.println("Adding "+dest.name()+" to be searched. Its previous node is "+node.getCurr()+". Its cost is "+cost+". Its total cost is "+(cost+node.getDistToStart())+" Its owner is "+thisRoute.getOwner());
 						PathNode nextNode = new PathNode(dest, node.getCurr(), node.getDistToStart()+cost);
 						openList.add(nextNode);
 					}
@@ -282,14 +283,14 @@ class Goal {
 	public boolean execute(TTRPlayer player){
 		boolean consideringClaimedRoutes = true;
 		ArrayList<ArrayList<Route>> neededRoutes = player.getPath(to, from, consideringClaimedRoutes);
-		for(ArrayList<Route> routes :neededRoutes){
-			System.out.println("Route from "+ routes.get(0).getDest1().name() + " to "+ routes.get(0).getDest2().name()+" at cost "+ routes.get(0).getCost());
-			//System.out.print(routes.get(0).getDest1().name()+" ");
-		}
 		
 		if(neededRoutes == null){
 			isCompleteable = false;
 			return false;
+		}
+		for(ArrayList<Route> routes :neededRoutes){
+			System.out.println("Route from "+ routes.get(0).getDest1().name() + " to "+ routes.get(0).getDest2().name()+" at cost "+ routes.get(0).getCost());
+			//System.out.print(routes.get(0).getDest1().name()+" ");
 		}
 		//order routes by the level of threat they face
 		LinkedList<Threat> routesByThreat = new LinkedList<Threat>();
@@ -298,12 +299,18 @@ class Goal {
 			routesByThreat.add(new Threat(routeBundle, totalThreat));
 		}
 		routesByThreat.sort(new ThreatComparator());
-		
+		for(Threat threat: routesByThreat){
+			Destination dest1 = threat.getRoute().get(0).getDest1();
+			Destination dest2 = threat.getRoute().get(0).getDest2();
+			int threatAmount = threat.getThreat();
+			System.out.print("Route from "+dest1+ " to "+dest2+" has threat "+threatAmount);
+		}
 		//try to purchase route
 		for(Threat threat: routesByThreat){
 			ArrayList<Route> routeBundle = threat.getRoute();
 			for(Route route:routeBundle){
 				if(canPurchase(route, player.getHand(), player.getNumTrainPieces())){
+					System.out.println("I think I can claim the route from "+route.getDest1()+" to "+route.getDest2());
 					//if grey route
 					if(route.getColor()==TrainCardColor.rainbow){
 						CardAmount maxColor = getColorOfMaxPieces(player.getHand());
@@ -346,10 +353,11 @@ class Goal {
 	}
 	
 	private boolean canPurchase(Route route, ArrayList<TrainCard> hand, int numPieces){
+		Routes routes = Routes.getInstance();
 		TrainCardColor routeColor = route.getColor();
 		int routeCost = route.getCost();
-		if(route.getOwner()!=null){
-			System.out.println("This route is owned. You have failed good sir.");
+		if(routes.isRouteClaimed(route)){
+			System.out.println("This route from "+ route.getDest1()+" to "+route.getDest2()+" is owned. You have failed good sir.");
 			return false;
 		}
 		if(routeCost>numPieces){
@@ -372,13 +380,13 @@ class Goal {
 		//grey routes
 		if(routeColor==TrainCardColor.rainbow){
 			CardAmount mostCard = getColorOfMaxPieces(hand);
-			if(mostCard.getAmount()+piecesOfRainbowAvailible>=routeCost){
+			if((mostCard.getAmount()+piecesOfRainbowAvailible)>=routeCost){
 				return true;
 			}
 		}
 		
 		//normal routes
-		if(piecesOfColorAvailible+piecesOfRainbowAvailible>=routeCost){
+		if((piecesOfColorAvailible+piecesOfRainbowAvailible)>=routeCost){
 			return true;
 		}
 		return false;
