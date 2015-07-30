@@ -1,5 +1,8 @@
 package ttr.model.player;
 
+import java.util.ArrayList;
+
+import ttr.model.destinationCards.Destination;
 import ttr.model.destinationCards.Route;
 import ttr.model.destinationCards.Routes;
 import ttr.model.trainCards.TrainCard;
@@ -10,7 +13,7 @@ import ttr.model.trainCards.TrainCardColor;
  * */
 public class StupidAI extends Player{
 	
-	//Routes routes;
+	Routes routes;
 
 	/**
 	 * Need to have this constructor so the player has a name, you can use no parameters and pass the name of your player
@@ -18,11 +21,11 @@ public class StupidAI extends Player{
 	 * */
 	public StupidAI(String name) {
 		super(name);
-		//routes = new Routes();
+		routes = Routes.getInstance();
 	}
 	public StupidAI(){
 		super("Stupid Player");
-		//routes = new Routes();
+		routes = Routes.getInstance();
 	}
 	
 	/**
@@ -30,34 +33,38 @@ public class StupidAI extends Player{
 	 * */
 	@Override
 	public void makeMove(){
+		System.out.println("");
 		//if I have no dest.tickets
 		if(super.getDestinationTickets().isEmpty()){
 			super.drawDestinationTickets();
 		}
 		
 		//can I complete any route
-		for(Route route: Routes.getInstance().getAllRoutes() ){
-			if(!Routes.getInstance().isRouteClaimed(route)){
+		for(Route route: routes.getAllRoutes()){
+			//System.out.println("Looking at route from "+route.getDest1()+ " to "+route.getDest2()+". That it is claimed is "+isRouteClaimed(route.getDest1(), route.getDest2()));
+			if(!routes.isRouteClaimed(route)){
 				TrainCardColor routeColor = route.getColor();
 				int routeCost = route.getCost();
 				//grey routes
 				if(routeColor==TrainCardColor.rainbow){
 					for(TrainCardColor color: TrainCardColor.values()){
-						int numCardsOfColor = getNumTrainCardsByColor(color);
-						if(numCardsOfColor >= routeCost){
-							//System.out.println("grey route");
-							super.claimRoute(new Route(route.getDest1(),route.getDest2(),route.getCost(), route.getColor()), color);
+						int numCardsOfColor = super.getNumTrainCardsByColor(color);
+						//System.out.println("Grey route, owner is "+route.getOwner());
+						if(numCardsOfColor+super.getNumTrainCardsByColor(TrainCardColor.rainbow) >= routeCost&&route.getOwner()==null){
+							System.out.println("Looking at route from "+route.getDest1()+ " to "+route.getDest2()+" Grey route, owner is "+route.getOwner()+ " Using "+color+ ". That it is claimed is "+routes.isRouteClaimed(route));
+							super.claimRoute(route, color);
 							break;
 						}
 					}
 				}
 				
 				//colored routes
-				else if(getNumTrainCardsByColor(routeColor)+getNumTrainCardsByColor(TrainCardColor.rainbow)>=routeCost){
-					//System.out.println("non-grey route");
-					super.claimRoute(new Route(route.getDest1(),route.getDest2(),route.getCost(),route.getColor()), routeColor);
+				else if(super.getNumTrainCardsByColor(routeColor)+super.getNumTrainCardsByColor(TrainCardColor.rainbow)>=routeCost&&route.getOwner()==null){
+					System.out.println("Colored route, owner is "+route.getOwner()+ " That it is claimed is "+routes.isRouteClaimed(route));
+					super.claimRoute(route, routeColor);
 					break;
 				}
+				//System.out.println("Colored route, owner is "+route.getOwner());
 			}
 		}
 		

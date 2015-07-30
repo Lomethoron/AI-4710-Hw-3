@@ -33,6 +33,7 @@ public class TTRPlayer extends Player {
 		}
 		Goal foo = bestOption(super.getDestinationTickets());
 		foo.execute(this);
+		//super.drawTrainCard(0);
 		
 		//Do I still have goals to accomplish
 			//if no, get new goals
@@ -272,7 +273,7 @@ class Goal {
 		this.from = from;
 		isCompleteable = true;
 	}
-	//not sure how I feel about doing this this way
+
 	/**
 	 * attempts to execute this goal
 	 * @param player the player
@@ -281,6 +282,11 @@ class Goal {
 	public boolean execute(TTRPlayer player){
 		boolean consideringClaimedRoutes = true;
 		ArrayList<ArrayList<Route>> neededRoutes = player.getPath(to, from, consideringClaimedRoutes);
+		for(ArrayList<Route> routes :neededRoutes){
+			System.out.println("Route from "+ routes.get(0).getDest1().name() + " to "+ routes.get(0).getDest2().name()+" at cost "+ routes.get(0).getCost());
+			//System.out.print(routes.get(0).getDest1().name()+" ");
+		}
+		
 		if(neededRoutes == null){
 			isCompleteable = false;
 			return false;
@@ -314,7 +320,7 @@ class Goal {
 		for(Threat threat: routesByThreat){
 			ArrayList<Route> routeBundle = threat.getRoute();
 			for(Route route:routeBundle){
-				if(!canPurchase(route, player.getHand(), player.getNumTrainPieces())){
+				if(!canPurchase(route, player.getHand(), player.getNumTrainPieces())&&route.getOwner()==null){
 					//if grey route
 					if(route.getColor()==TrainCardColor.rainbow){
 						player.drawTrainCard(0); //get random card
@@ -358,7 +364,7 @@ class Goal {
 			if(card.getColor()==routeColor){
 				piecesOfColorAvailible++;
 			}
-			if(card.getColor()==TrainCardColor.rainbow){//why isnt this formatting aaaagh
+			if(card.getColor()==TrainCardColor.rainbow){
 				piecesOfRainbowAvailible++;
 			}
 		}
